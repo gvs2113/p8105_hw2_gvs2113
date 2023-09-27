@@ -1,0 +1,7 @@
+---
+title: "Homework 2 - P8105"
+output: github_document
+author: Grace Santos 
+date: "2023-09-27"
+---
+
