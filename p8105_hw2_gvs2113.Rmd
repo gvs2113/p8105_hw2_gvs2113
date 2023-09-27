@@ -13,7 +13,7 @@ library(tidyverse)
 
 ## Problem 1 
 
-```{r}
+```{r, pols_month}
 pols_month_df = 
   read_csv("fte_data/pols-month.csv") |> 
   janitor::clean_names() |> #clean the dataset
@@ -35,6 +35,41 @@ pols_month_df =
         "11" ~ "November",
         "12" ~ "December")
   )
+```
 
+```{r, snp}
+snp_df = 
+  read_csv("fte_data/snp.csv") |> 
+  janitor::clean_names() |> 
+  separate(date, into = c("month", "day", "year")) |> 
+mutate(
+    month = #replace month number with month name 
+      case_match( 
+        month, 
+        "1" ~ "January",
+        "2" ~ "Feburary",
+        "3" ~ "March",
+        "4" ~ "April",
+        "5" ~ "May",
+        "6" ~ "June",
+        "7" ~ "July",
+        "8" ~ "August",
+        "9" ~ "September",
+        "10" ~ "October",
+        "11" ~ "November",
+        "12" ~ "December")
+  )
+  select(snp_df, year, month, close)
+```
+
+```{r, unemployment}
+unemploy_df = 
+  read_csv("fte_data/unemployment.csv") |> 
+  janitor:: clean_names() |> 
+  pivot_longer(
+    jan:dec,
+    names_to = "month",
+    values_to = "unemployment rate?"
+  )
 ```
 
