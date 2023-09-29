@@ -125,11 +125,10 @@ bl_data =
 
 amy_data = 
   read_csv("mci_data/mci_amyloid.csv", skip = 1, col_names = TRUE) |> 
-  janitor::clean_names()
+  janitor::clean_names() |> 
+  rename("id" = "study_id")
 
-##mci_tidy = 
- # bind_cols(
-   # bl_data, amy_data,
-   # .name_repair = c("unique"))
+mci_tidy = 
+ full_join(bl_data, amy_data, by = "id")
 ```
 
