@@ -14,64 +14,51 @@ library(tidyverse)
 ## Problem 1 
 
 ```{r, pols_month}
+ month_df = 
+    tibble(
+    month_num = 1:12, 
+    month_abb = month.abb, 
+    month = month.name)
+
 pols_month_df = 
   read_csv("fte_data/pols-month.csv") |> 
-  janitor::clean_names() |> #clean the dataset
-  separate(mon, into = c("year", "month", "day")) |> #breakup mon into integer variables
+  separate(mon, into = c("year", "month_num", "day"), convert = TRUE) |> 
   mutate(
-    month = #replace month number with month name 
-      case_match( 
-        month, 
-        "01" ~ "January",
-        "02" ~ "Feburary",
-        "03" ~ "March",
-        "04" ~ "April",
-        "05" ~ "May",
-        "06" ~ "June",
-        "07" ~ "July",
-        "08" ~ "August",
-        "09" ~ "September",
-        "10" ~ "October",
-        "11" ~ "November",
-        "12" ~ "December")
-  )
+    president = recode(prez_gop, "0" = "dem", "1" = "gop", "2" = "gop")) |> 
+  left_join(x = _, y = month_df) |> 
+  select(year, month, everything(), -day, -starts_with("prez"))
 ```
 
 ```{r, snp}
 snp_df = 
   read_csv("fte_data/snp.csv") |> 
-  janitor::clean_names() |> 
-  separate(date, into = c("month", "day", "year")) |> 
-mutate(
-    month = #replace month number with month name 
-      case_match( 
-        month, 
-        "1" ~ "January",
-        "2" ~ "Feburary",
-        "3" ~ "March",
-        "4" ~ "April",
-        "5" ~ "May",
-        "6" ~ "June",
-        "7" ~ "July",
-        "8" ~ "August",
-        "9" ~ "September",
-        "10" ~ "October",
-        "11" ~ "November",
-        "12" ~ "December")
-  )
-  select(snp_df, year, month, close)
+  separate(date, into = c("month", "day", "year"), convert = TRUE) |> 
+  arrange(year, month) |> 
+  mutate(month = month.name[month]) |> 
+  select(year, month, close)
 ```
 
 ```{r, unemployment}
 unemploy_df = 
   read_csv("fte_data/unemployment.csv") |> 
-  janitor:: clean_names() |> 
+  rename(year = Year) |> 
   pivot_longer(
-    jan:dec,
-    names_to = "month",
-    values_to = "unemployment rate?"
-  )
+    Jan:Dec,
+    names_to = "month_abb",
+    values_to = "unemployment"
+  ) |> 
+  left_join(x = _, y = month_df) |> 
+  select(year, month, unemployment)
 ```
+
+```{r}
+fte_data = 
+  left_join(pols_month_df, snp_df) |> 
+  left_join(x = _, y = unemploy_df)
+
+str(fte_data)
+```
+
 
 ## Problem 2 
 ```{r}
