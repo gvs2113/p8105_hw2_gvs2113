@@ -75,7 +75,7 @@ In Januarys in or after 1975 in which a democrat was president, the **average un
 ## Problem 2 
 ```{r}
 mr_trash = 
-  readxl::read_excel("trash_data/202207 Trash Wheel Collection Data.xlsx", sheet = "Mr. Trash Wheel", range = "A2:M549") |> 
+  readxl::read_excel("trash_data/202309 Trash Wheel Collection Data.xlsx", sheet = "Mr. Trash Wheel", range = "A2:M586") |> 
   janitor::clean_names() |> 
   mutate(
     year = as.numeric(year), 
@@ -83,14 +83,14 @@ mr_trash =
     homes_powered = (weight_tons *500)/30)
 
 prof_trash = 
-    readxl::read_excel("trash_data/202207 Trash Wheel Collection Data.xlsx", sheet = "Professor Trash Wheel", range = "A2:L96") |> 
+    readxl::read_excel("trash_data/202309 Trash Wheel Collection Data.xlsx", sheet = "Professor Trash Wheel", range = "A2:L108") |> 
   janitor::clean_names() |> 
   mutate(
     name = "prof_trash_wheel",
     homes_powered = (weight_tons *500)/30)
 
 gwy_trash = 
-  readxl::read_excel("trash_data/202207 Trash Wheel Collection Data.xlsx", sheet = "Gwynnda Trash Wheel", range = "A2:J108") |> 
+  readxl::read_excel("trash_data/202309 Trash Wheel Collection Data.xlsx", sheet = "Gwynnda Trash Wheel", range = "A2:K157") |> 
   janitor::clean_names() |>
   mutate(
     name = "gwynnda_trash_wheel",
@@ -101,7 +101,12 @@ trash_tidy =
   select(name, everything())
 ```
 
-Need to still write paragraph - want clarity on code before finishing the problem 
+The Mr.Trash data has `r nrow(mr_trash)` observations and `r ncol(mr_trash)` variables and tells us about the types, weight, and volume of trash collected on specific dates from a water-wheel vessel (named Mr.Trash Wheel) located in the Inner Harbor in Baltimore, MD.  
+
+In an effort to further reduce the amount of trash pollution in Baltimore, the Healthy Harbor initiative has included three more water-wheel vessels named: Professor Trash Wheel, Captain Trash Wheel and Gwynnda Trash Wheel. In this problem, the data for the Professor and Gwynnda trash wheels were examined. The Professor data has `r nrow(prof_trash)` observations and `r ncol(prof_trash)` variables and the Gwynnda data has `r nrow(gwy_trash)` observations and `r ncol(gwy_trash)` variables.
+
+When all three data sets are joined together in the `trash_tidy` dataframe, there are a total of `r nrow(trash_tidy)` observations and `r ncol(trash_tidy)` variables. From years `r mr_trash |> pull(year) |> min()` to `r mr_trash |> pull(year) |> max()`, Mr. Trash Wheel collected a total of `r filter(trash_tidy, name == "mr_trash_wheel") |> pull(weight_tons) |> sum() |> round(2)` tons of trash. Gwynnda Trash Wheel collected a total of `r filter(trash_tidy, name == "gwynnda_trash_wheel", month == "July", year == "2021") |> pull(cigarette_butts) |> sum()` cigarette butts in July of 2021. 
+
 
 ## Problem 3 
 ```{r}
