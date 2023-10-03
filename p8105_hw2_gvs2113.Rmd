@@ -31,10 +31,12 @@ pols_month_df =
 
 ```{r, snp}
 snp_df = 
-  read_csv("fte_data/snp.csv") |> 
-  separate(date, into = c("month", "day", "year"), convert = TRUE) |> 
-  arrange(year, month) |> 
-  mutate(month = month.name[month]) |> 
+  read_csv("fte_data/snp.csv",
+           col_types = cols(date = col_date(format = "%m/%d/%y"))) |> 
+  separate(date, into = c("year", "month_num", "day"), convert = TRUE) |> 
+  mutate(
+    year = if_else(year > 2023, year - 100, year)) |> 
+  left_join(x = _, y = month_df) |> 
   select(year, month, close)
 ```
 
@@ -58,6 +60,16 @@ fte_data =
 
 str(fte_data)
 ```
+
+When looking at the final joined data, there are `NA` values in the `close` and `unemployment` variables, which indicates missing values. 
+
+The `pols_month_df` data has `r nrow(pols_month_df)` observations and `r ncol(pols_month_df)` variables and tells us about the party affiliation distribution (democrat or republican) for governors and senators for a given year from years `r pols_month_df |> pull(year) |> min()` to `r pols_month_df |> pull(year) |> max()`. It also tells us whether the sitting president was a democrat or republican. 
+
+The `snp_df` data has `r nrow(snp_df)` observations and `r ncol(snp_df)` variables, ranging from years `r snp_df |> pull(year) |> min()` to `r snp_df |> pull(year) |> max()`. 
+
+The `unemploy_df` data has `r nrow(unemploy_df)` observations and `r ncol(unemploy_df)` variables ranging from years `r unemploy_df |> pull(year) |> min()` to `r unemploy_df |> pull(year) |> max()`. 
+
+In Januarys in or after 1975 in which a democrat was president, the **average unemployment rate was `r filter(fte_data, month == "January", year >= 1975, president == "dem") |> pull(unemployment) |> mean() |> round(2)`**.  The average unemployment rate over the same time period in which a republican was president was `r filter(fte_data, month == "January", year >= 1975, president == "gop") |> pull(unemployment) |> mean() |> round(2)`.
 
 
 ## Problem 2 
