@@ -10,8 +10,9 @@ date: "2023-09-27"
 library(tidyverse)
 ```
 
-
 ## Problem 1 
+
+The following problem was attempted (as shown in previous commits and pushes) but I changed the code to better reflect what was given as the correct solution after it was posted. I did this in order to have record of how to do the problem correctly when it is time to review my homework for studying purposes. 
 
 ```{r, pols_month}
  month_df = 
@@ -72,6 +73,8 @@ The `unemploy_df` data has `r nrow(unemploy_df)` observations and `r ncol(unempl
 In Januarys in or after 1975 in which a democrat was president, the **average unemployment rate was `r filter(fte_data, month == "January", year >= 1975, president == "dem") |> pull(unemployment) |> mean() |> round(2)`**. The average unemployment rate over the same time period in which a republican was president was `r filter(fte_data, month == "January", year >= 1975, president == "gop") |> pull(unemployment) |> mean() |> round(2)`.
 
 
+
+
 ## Problem 2 
 ```{r}
 mr_trash = 
@@ -101,11 +104,13 @@ trash_tidy =
   select(name, everything())
 ```
 
-The Mr.Trash data has `r nrow(mr_trash)` observations and `r ncol(mr_trash)` variables and tells us about the types, weight, and volume of trash collected on specific dates from a water-wheel vessel (named Mr.Trash Wheel) located in the Inner Harbor in Baltimore, MD.  
+The Mr. Trash data has `r nrow(mr_trash)` observations and `r ncol(mr_trash)` variables and tells us about the types, weight, and volume of trash collected on specific dates from a water-wheel vessel (named Mr. Trash Wheel) located in the Inner Harbor in Baltimore, MD.  
 
 In an effort to further reduce the amount of trash pollution in Baltimore, the Healthy Harbor initiative has included three more water-wheel vessels named: Professor Trash Wheel, Captain Trash Wheel and Gwynnda Trash Wheel. In this problem, the data for the Professor and Gwynnda trash wheels were examined. The Professor data has `r nrow(prof_trash)` observations and `r ncol(prof_trash)` variables and the Gwynnda data has `r nrow(gwy_trash)` observations and `r ncol(gwy_trash)` variables.
 
 When all three data sets are joined together in the `trash_tidy` dataframe, there are a total of `r nrow(trash_tidy)` observations and `r ncol(trash_tidy)` variables. From years `r prof_trash |> pull(year) |> min()` to `r prof_trash |> pull(year) |> max()`, Professor Trash Wheel collected a total of `r filter(trash_tidy, name == "prof_trash_wheel") |> pull(weight_tons) |> sum() |> round(2)` tons of trash. Gwynnda Trash Wheel collected a total of `r filter(trash_tidy, name == "gwynnda_trash_wheel", month == "July", year == "2021") |> pull(cigarette_butts) |> sum()` cigarette butts in July of 2021. 
+
+
 
 
 ## Problem 3 
@@ -127,7 +132,9 @@ bl_data =
   filter(current_age < age_at_onset | is.na(age_at_onset))
 ```
 
-Discuss important steps in the import process and relevant features of the dataset. How many participants were recruited, and of these how many develop MCI? What is the average baseline age? What proportion of women in the study are APOE4 carriers?
+It was important to look at the original csv for baseline data before importing to  get an idea of what I needed to include for the needs of this problem. Once I observed that the first row had explanatory, but otherwise had unnecessary information, I decided to use the `skip` argument in my `read_csv()` function to not include it. It was also necessary to keep the column names with the `col_names = TRUE` argument and edit the data to interpret the "." in the age at onset column as `NA` using the `na = "."` argument. It was helpful to then clean the column names into snake case and then proceed with encoding the sex and APOE4 carrier status and filtering out those participants who did not have have MCI at baseline. This was done by filtering by ages, if the participants age at onset was less than their current age, that meant that they had the MCI at baseline and needed to be excluded. 
+
+In total, there were `r nrow(bl_data)` participants recruited and `r filter(bl_data, age_at_onset != "NA") |> nrow()`  participants developed MCI. The average baseline age was `r bl_data |> pull(current_age) |>  mean() |> round(2)` years old. Within the total the study participant group, there are  `r filter(bl_data, sex == "female" & apoe4 == "carrier") |> nrow()` women who are APOE4 carriers. 
 
 ```{r}
 amy_data = 
@@ -143,12 +150,18 @@ amy_data =
 
 comment on the steps on the import process and the features of the dataset.
 
+It was also important to look at the original amyloid csv file before importing it so that I would know to include the `skip` and the `col_names = TRUE` arguments within my `read_csv()` function. I then cleaned the names and renamed the "study_id" column name to just "id" so that it was consistent with the column naming used in the baseline data. Also, since the amyloid data set gave measurements of the amyloid ratio computed at different time points, I decided to use the `pivot_longer()` function to further tidy the dataset so that time and the ratio can be separate columns. While this did increase the length of the data set tremendously, it did help to simplify the readability of the dataset and make it more tidy. After all of the tidying steps, overall the amyloid data had a total of `r nrow(amy_data)` rows with `r ncol(amy_data)` columns. 
+
+
+In attempting to check the participants who only appeared in the baseline of amyloid datasets, I found a resource online that utilized the `comparedf()` function within the `"arsenal"` package to be able to run a detailed summary of differences between two datasets. I installed the package and compared the  `bl_data` and `amy_data` data sets by ID numbers using the code below. 
+
 ```{r, eval = FALSE}
 library(arsenal)
 summary(comparedf(bl_data, amy_data, by = "id"))
 ```
 
-Check whether some participants appear in only the baseline or amyloid datasets, and comment on your findings
+After running the code, the output resulted in finding 8 participants only in the baseline data (ID# 14, 49, 92, 179, 268, 304, 389, 412) and 16 participants who were only in the amyloid data (ID# 72, 234, 283, 380, 484-495). 
+
 
 ```{r}
 mci_tidy = 
@@ -157,5 +170,6 @@ mci_tidy =
 write.csv(mci_tidy, "./mci_data/combined_data.csv", row.names = TRUE)
 ```
 
-and briefly describe the resulting dataset
+Lastly, both data sets were joined by ID number using the `inner_join()` function. This resulted in a datset with `r nrow(mci_tidy)` rows and `r ncol(mci_tidy)` columns. The completed data file can be found in my mci_data folder in my data directory. 
+
 
